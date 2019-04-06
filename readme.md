@@ -50,4 +50,45 @@ assert validator.repr_errors() == [
 ]
 ```
 
+## Features
+
+🗣️ Speak the language of Python classes:
+
+```Python
+from pythonish_validator.common import Validator
+
+
+class User:
+    __validation_schema__ = {
+        'id': int,
+        'name': str
+    }
+
+
+validator = Validator({
+    "users": [User]
+})
+
+# valid structure
+validator.is_valid({
+    "users": [
+        {'id': 1, 'name': 'Alice'},
+        {'id': 2, 'name': 'Bob'},
+    ]
+})
+
+# invalid structure
+validator.is_valid({
+    "users": [
+        {'id': '1', 'name': 'Alice'},
+        {'id': 2},
+    ]
+})
+
+assert validator.repr_errors() == [
+    "{'users'}->[0]->{'id'}->str('1')",
+    "{'users'}->[1]->{'name'}",
+]
+```
+
 If you find any mistake – please write to the [issue list 🐨](https://github.com/bugov/pythonish-validator/issues).
