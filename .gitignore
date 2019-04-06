@@ -1,0 +1,7 @@
+.coverage
+.eggs/
+.idea/
+.tox/
+htmlcov/
+pythonish_validator.egg-info/
+__pycache__
