@@ -4,30 +4,30 @@ empty = object()
 
 
 class Validator:
-    def __init__(self, scheme):
-        self.scheme = scheme
+    def __init__(self, schema):
+        self.schema = schema
         self.current_path = []
         self.errors = []
 
     def __bool__(self):
         return not self.errors
 
-    def _validate_dict(self, data: dict, scheme_node: dict) -> bool:
+    def _validate_dict(self, data: dict, schema_node: dict) -> bool:
         if type(data) != dict:
             self.errors.append(deepcopy(self.current_path))
             return False
 
         data_keys = set(data.keys())
-        scheme_keys = set(scheme_node.keys())
-        if data_keys != scheme_keys:
-            for key in data_keys ^ scheme_keys:
+        schema_keys = set(schema_node.keys())
+        if data_keys != schema_keys:
+            for key in data_keys ^ schema_keys:
                 self.current_path.append((dict, key))
                 self.errors.append(deepcopy(self.current_path))
                 self.current_path.pop()
             return False
 
         is_valid = True
-        for key, node in scheme_node.items():
+        for key, node in schema_node.items():
             self.current_path.append((dict, key))
 
             if not self.is_valid(data[key], node):
@@ -37,13 +37,13 @@ class Validator:
 
         return is_valid
 
-    def _validate_list(self, data: list, scheme_node: list) -> bool:
+    def _validate_list(self, data: list, schema_node: list) -> bool:
         if type(data) != list:
             self.errors.append(deepcopy(self.current_path))
             return False
 
         is_valid = True
-        node = scheme_node[0]
+        node = schema_node[0]
 
         for idx, val in enumerate(data):
             self.current_path.append((list, idx))
@@ -55,14 +55,14 @@ class Validator:
 
         return is_valid
 
-    def _validate_object(self, data, scheme_node) -> bool:
+    def _validate_object(self, data, schema_node) -> bool:
         self.current_path.append((type(data), data))
         is_valid = True
 
-        if scheme_node is None:
+        if schema_node is None:
             if data is not None:
                 is_valid = False
-        elif type(data) != scheme_node:
+        elif type(data) != schema_node:
             is_valid = False
 
         if not is_valid:
@@ -71,25 +71,25 @@ class Validator:
         self.current_path.pop()
         return is_valid
 
-    def is_valid(self, data, scheme_node=empty) -> bool:
-        if scheme_node is empty:
+    def is_valid(self, data, schema_node=empty) -> bool:
+        if schema_node is empty:
             self.current_path = []
             self.errors = []
-            scheme_node = self.scheme
+            schema_node = self.schema
 
         is_valid = True
 
-        if isinstance(scheme_node, dict):
-            if not self._validate_dict(data, scheme_node):
+        if isinstance(schema_node, dict):
+            if not self._validate_dict(data, schema_node):
                 is_valid = False
-        elif isinstance(scheme_node, list):
-            if not self._validate_list(data, scheme_node):
+        elif isinstance(schema_node, list):
+            if not self._validate_list(data, schema_node):
                 is_valid = False
-        elif hasattr(scheme_node, '__validation_schema__'):
-            if not self.is_valid(data, scheme_node.__validation_schema__):
+        elif hasattr(schema_node, '__validation_schema__'):
+            if not self.is_valid(data, schema_node.__validation_schema__):
                 is_valid = False
         else:
-            if not self._validate_object(data, scheme_node):
+            if not self._validate_object(data, schema_node):
                 is_valid = False
 
         return is_valid
@@ -111,7 +111,7 @@ class Validator:
         return rules
 
 
-def validate(scheme, data) -> Validator:
-    validator = Validator(scheme)
+def validate(schema, data) -> Validator:
+    validator = Validator(schema)
     validator.is_valid(data)
     return validator
