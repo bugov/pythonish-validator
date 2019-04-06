@@ -24,7 +24,7 @@ def test_repr_may():
         'age': None,
         'skills': ['Python', 'Perl', 42]
     })
-    assert validator.repr_errors() == [
+    assert set(validator.repr_errors()) == {
         "{'age'}->NoneType(None)",
-        "{'skills'}->[2]->int(42)"
-    ]
+        "{'skills'}->[2]->int(42)",
+    }
