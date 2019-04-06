@@ -12,7 +12,7 @@ def read(fname):
 setup(
     # Basic package information:
     name='pythonish-validator',
-    version='0.2',
+    version='0.3',
     py_modules=('pythonish_validator',),
 
     # Packaging options:

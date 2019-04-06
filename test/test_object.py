@@ -11,6 +11,7 @@ WRONG_DATA_SAMPLE = {
     "users": [
         {'id': '1', 'name': 'Alice'},
         {'id': 2},
+        {'id': 3, 'name': 1},
     ]
 }
 
@@ -33,4 +34,5 @@ def test_object():
     assert set(validator.repr_errors()) == {
         "{'users'}->[0]->{'id'}->str('1')",
         "{'users'}->[1]->{'name'}",
+        "{'users'}->[2]->{'name'}->int(1)",
     }

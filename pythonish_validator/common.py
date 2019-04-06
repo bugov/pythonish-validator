@@ -71,28 +71,36 @@ class Validator:
         self.current_path.pop()
         return is_valid
 
+    def _validate__validation_schema__(self, data, schema_node) -> bool:
+        is_valid = True
+
+        validation_schema = getattr(schema_node, '__validation_schema__')
+        if hasattr(validation_schema, '__call__'):
+            if not validation_schema(data):
+                self.current_path.append((type(data), data))
+                self.errors.append(deepcopy(self.current_path))
+                self.current_path.pop()
+                is_valid = False
+        else:
+            if not self.is_valid(data, schema_node.__validation_schema__):
+                is_valid = False
+
+        return is_valid
+
     def is_valid(self, data, schema_node=empty) -> bool:
         if schema_node is empty:
             self.current_path = []
             self.errors = []
             schema_node = self.schema
 
-        is_valid = True
-
         if isinstance(schema_node, dict):
-            if not self._validate_dict(data, schema_node):
-                is_valid = False
-        elif isinstance(schema_node, list):
-            if not self._validate_list(data, schema_node):
-                is_valid = False
-        elif hasattr(schema_node, '__validation_schema__'):
-            if not self.is_valid(data, schema_node.__validation_schema__):
-                is_valid = False
-        else:
-            if not self._validate_object(data, schema_node):
-                is_valid = False
+            return self._validate_dict(data, schema_node)
+        if isinstance(schema_node, list):
+            return self._validate_list(data, schema_node)
+        if hasattr(schema_node, '__validation_schema__'):
+            return self._validate__validation_schema__(data, schema_node)
 
-        return is_valid
+        return self._validate_object(data, schema_node)
 
     def repr_errors(self) -> list:
         rules = []

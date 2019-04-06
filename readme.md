@@ -91,4 +91,44 @@ assert validator.repr_errors() == [
 ]
 ```
 
+🎓 And even custom validation:
+
+```Python
+import re
+
+from pythonish_validator.common import Validator
+
+
+class EmailType:
+    @staticmethod
+    def __validation_schema__(data):
+        if not isinstance(data, str):
+            return False
+
+        if re.match(r'\w+@\w+.\w{2,5}', data) is None:
+            return False
+
+        return True
+
+
+class User:
+    __validation_schema__ = {
+        'id': int,
+        'name': str,
+        'email': EmailType,
+    }
+
+
+validator = Validator({
+    "users": [User]
+})
+
+validator.is_valid({
+    "users": [
+        {'id': 1, 'name': 'Alice', 'email': 'alice@example.com'},
+        {'id': 2, 'name': 'Bob', 'email': 'bob@example.com'},
+    ]
+})
+```
+
 If you find any mistake – please write to the [issue list 🐨](https://github.com/bugov/pythonish-validator/issues).
