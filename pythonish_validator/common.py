@@ -20,7 +20,10 @@ class Validator:
         data_keys = set(data.keys())
         scheme_keys = set(scheme_node.keys())
         if data_keys != scheme_keys:
-            self.errors.append(deepcopy(self.current_path))
+            for key in data_keys ^ scheme_keys:
+                self.current_path.append((dict, key))
+                self.errors.append(deepcopy(self.current_path))
+                self.current_path.pop()
             return False
 
         is_valid = True
@@ -81,6 +84,9 @@ class Validator:
                 is_valid = False
         elif isinstance(scheme_node, list):
             if not self._validate_list(data, scheme_node):
+                is_valid = False
+        elif hasattr(scheme_node, '__validation_schema__'):
+            if not self.is_valid(data, scheme_node.__validation_schema__):
                 is_valid = False
         else:
             if not self._validate_object(data, scheme_node):
