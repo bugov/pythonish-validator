@@ -1,6 +1,11 @@
 from copy import deepcopy
+from typing import Union, _GenericAlias
 
 empty = object()
+
+
+def _is_typing(obj):
+    return isinstance(obj, _GenericAlias)
 
 
 class Validator:
@@ -14,7 +19,9 @@ class Validator:
 
     def _validate_dict(self, data: dict, schema_node: dict) -> bool:
         if type(data) != dict:
+            self.current_path.append((type(data), data))
             self.errors.append(deepcopy(self.current_path))
+            self.current_path.pop()
             return False
 
         data_keys = set(data.keys())
@@ -37,9 +44,38 @@ class Validator:
 
         return is_valid
 
+    def _validate_typing_dict(self, data: dict, schema_part: tuple):
+        if type(data) != dict:
+            self.current_path.append((type(data), data))
+            self.errors.append(deepcopy(self.current_path))
+            self.current_path.pop()
+            return False
+
+        is_valid = True
+
+        schema_key, schema_val = schema_part
+        for key in data.keys():
+            if not isinstance(key, schema_key):
+                is_valid = False
+                self.current_path.append((dict, key))
+                self.errors.append(deepcopy(self.current_path))
+                self.current_path.pop()
+
+        for key, val in data.items():
+            self.current_path.append((dict, key))
+
+            if not self.is_valid(data[key], schema_val):
+                is_valid = False
+
+            self.current_path.pop()
+
+        return is_valid
+
     def _validate_list(self, data: list, schema_node: list) -> bool:
         if type(data) != list:
+            self.current_path.append((type(data), data))
             self.errors.append(deepcopy(self.current_path))
+            self.current_path.pop()
             return False
 
         is_valid = True
@@ -87,6 +123,27 @@ class Validator:
 
         return is_valid
 
+    def _validate_optional(self, data, schema_node) -> bool:
+        is_valid = True
+
+        matched = [
+            klass for klass in schema_node.__args__
+            if _is_typing(klass) or isinstance(data, klass)
+        ]
+
+        tmp_error = deepcopy(self.errors)
+        tmp_path = deepcopy(self.current_path)
+        if not any([self.is_valid(data, a) for a in matched]):
+            self.current_path.append((type(data), data))
+            self.errors.append(deepcopy(self.current_path))
+            self.current_path.pop()
+            is_valid = False
+        else:
+            self.current_path = tmp_path
+            self.errors = tmp_error
+
+        return is_valid
+
     def is_valid(self, data, schema_node=empty) -> bool:
         if schema_node is empty:
             self.current_path = []
@@ -95,8 +152,18 @@ class Validator:
 
         if isinstance(schema_node, dict):
             return self._validate_dict(data, schema_node)
+
         if isinstance(schema_node, list):
             return self._validate_list(data, schema_node)
+
+        if _is_typing(schema_node):
+            if schema_node.__origin__ is Union:
+                return self._validate_optional(data, schema_node)
+            if schema_node.__origin__ is list:
+                return self._validate_list(data, list(schema_node.__args__))
+            if schema_node.__origin__ is dict:
+                return self._validate_typing_dict(data, schema_node.__args__)
+
         if hasattr(schema_node, '__validation_schema__'):
             return self._validate__validation_schema__(data, schema_node)
 
@@ -116,7 +183,7 @@ class Validator:
 
             rules.append('->'.join(rule))
 
-        return rules
+        return list(set(rules))
 
 
 def validate(schema, data) -> Validator:
