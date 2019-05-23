@@ -6,6 +6,8 @@ pythonish-validator
 Data validation library for Python without complex schemas.
 It's how you write Python code:
 
+Works with Python >= 3.7
+
 .. code:: bash
 
         from pythonish_validator.common import Validator
