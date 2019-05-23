@@ -40,5 +40,5 @@ setup(
     url='https://github.com/bugov/pythonish-validator',
     keywords='validator data check structure scheme',
     description='Pythonish object scheme validator',
-    long_description=read('readme.md'),
+    long_description=read('readme.rst'),
 )
