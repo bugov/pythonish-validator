@@ -4,9 +4,11 @@ from typing import Union, _GenericAlias
 empty = object()
 
 
-def _is_typing(obj):
+def _is_typing(obj) -> bool:
     return isinstance(obj, _GenericAlias)
 
+def has_custom_validation_schema(obj) -> bool:
+    return hasattr(obj, '__validation_schema__')
 
 class Validator:
     def __init__(self, schema):
@@ -128,7 +130,7 @@ class Validator:
 
         matched = [
             klass for klass in schema_node.__args__
-            if _is_typing(klass) or isinstance(data, klass)
+            if _is_typing(klass) or isinstance(data, klass) or has_custom_validation_schema(klass)
         ]
 
         tmp_error = deepcopy(self.errors)
@@ -164,7 +166,7 @@ class Validator:
             if schema_node.__origin__ is dict:
                 return self._validate_typing_dict(data, schema_node.__args__)
 
-        if hasattr(schema_node, '__validation_schema__'):
+        if has_custom_validation_schema(schema_node):
             return self._validate__validation_schema__(data, schema_node)
 
         return self._validate_object(data, schema_node)

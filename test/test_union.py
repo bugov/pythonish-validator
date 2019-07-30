@@ -10,7 +10,6 @@ def test_optional_str():
     validator.is_valid([1])
     assert validator.repr_errors() == ["[[1]]"]
 
-
     validator = Validator({
         'name': str,
         'age': int,
@@ -73,3 +72,25 @@ def test_union_complex():
     assert validator.is_valid({'value': None}), validator.repr_errors()
     assert validator.is_valid({'value': 1}), validator.repr_errors()
     assert validator.is_valid({'value': ['1']}), validator.repr_errors()
+
+
+class OperationsFileType:
+    @staticmethod
+    def __validation_schema__(data):
+        if not isinstance(data, str):
+            return False
+
+        return data in {'xml', 'pdf'}
+
+
+def test_union_with_custom_validation():
+    validator = Validator({'format': Union[OperationsFileType, List[OperationsFileType]]})
+
+    assert validator.is_valid({'format': 'xml'})
+    assert validator.is_valid({'format': ['xml']})
+
+    validator.is_valid({'format': ['xlm']})
+    assert set(validator.repr_errors()) == {
+        "{'format'}->[0]->str('xlm')",
+        "{'format'}->[['xlm']]",
+    }
