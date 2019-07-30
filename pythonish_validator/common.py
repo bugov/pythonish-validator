@@ -7,8 +7,10 @@ empty = object()
 def _is_typing(obj) -> bool:
     return isinstance(obj, _GenericAlias)
 
+
 def has_custom_validation_schema(obj) -> bool:
     return hasattr(obj, '__validation_schema__')
+
 
 class Validator:
     def __init__(self, schema):
