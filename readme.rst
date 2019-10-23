@@ -56,6 +56,35 @@ Error messages
             "{'skills'}->[2]->int(42)"
         ]
 
+Basic typing module support
+---------------------------
+
+Supported types: List, Dict, Optional, Union.
+
+.. code:: bash
+
+        from typing import Dict, List, Optional, Union
+        from pythonish_validator.common import validate
+
+        schema_example = {
+            'name': str,
+            'age': Optional[int],  # None if undefined
+            'skill': Union[str, List[str]],  # Awful API, but who cares...
+            'level_by_skill': Dict[str, str]
+        }
+
+        valid_data = {
+            'name': 'Georgy',
+            'age': None,
+            'skill': ['Python', 'ECMA Script'],
+            'level_by_skill': {
+                'Python': 'senior',
+                'ECMA Script': 'middle',
+            }
+        }
+
+        validator = validate(schema_example, valid_example)
+
 Features
 --------
 
