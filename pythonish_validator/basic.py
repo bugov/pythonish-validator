@@ -1,4 +1,5 @@
 from copy import deepcopy
+from re import Pattern
 from typing import _GenericAlias
 
 empty = object()
@@ -221,3 +222,16 @@ def validate_validation_schema(ctx: BaseValidator, data, schema_node) -> bool:
             is_valid = False
 
     return is_valid
+
+
+def validate_regex(ctx: BaseValidator, data: str, schema_node: Pattern) -> bool:
+    if (
+        not isinstance(data, str)
+        or schema_node.match(data) is None
+    ):
+        ctx.current_path.append((type(data), data))
+        ctx.errors.append(deepcopy(ctx.current_path))
+        ctx.current_path.pop()
+        return False
+
+    return True
