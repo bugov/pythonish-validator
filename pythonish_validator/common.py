@@ -17,7 +17,7 @@ from pythonish_validator.basic import (
 )
 
 
-_common_pipeline = (
+_common_check_chain = (
     CheckChain()
     .add(lambda x: isinstance(x, dict), validate_dict)
     .add(lambda x: isinstance(x, list), validate_list)
@@ -28,7 +28,7 @@ _common_pipeline = (
     .add(lambda x: True, validate_object)  # Last check
 )
 
-Validator = partial(BaseValidator, _common_pipeline)
+Validator = partial(BaseValidator, _common_check_chain)
 
 
 def validate(schema, data) -> Validator:

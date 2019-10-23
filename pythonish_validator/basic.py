@@ -14,11 +14,11 @@ def has_custom_validation_schema(obj) -> bool:
 
 class CheckChain:
     """
-    >>> pipe = CheckChain()
-    >>> pipe \
+    >>> chain = CheckChain()
+    >>> chain \
     ...     .add(lambda x: isinstance(x, dict), validate_dict) \
     ...     .add(lambda x: True, validate_object)
-    >>> pipe.is_valid(BaseValidator(...), {'age': 30}, {'age': int})
+    >>> chain.is_valid(BaseValidator(...), {'age': 30}, {'age': int})
     True
     """
     def __init__(self):
@@ -38,8 +38,8 @@ class CheckChain:
 
 class BaseValidator:
     """
-    >>> pipe = CheckChain().add(lambda x: isinstance(x, dict), validate_dict)
-    >>> validator = BaseValidator(pipe, {'age': int})
+    >>> chain = CheckChain().add(lambda x: isinstance(x, dict), validate_dict)
+    >>> validator = BaseValidator(chain, {'age': int})
     >>> validator.is_valid({'age': 30})
     True
     """
