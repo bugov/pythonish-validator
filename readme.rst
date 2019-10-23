@@ -8,19 +8,22 @@ It's how you write Python code:
 
 🐍 Works with Python >= 3.7
 
-.. code:: bash
+.. code:: python
 
+        from re import compile as regex
         from pythonish_validator.common import Validator
 
         validator = Validator({
             'name': str,
             'age': int,
+            'email': regex(r'^\w+@\w+.\w{2,5}$')
             'skills': [str]
         })
 
         validator.is_valid({
             'name': 'Georgy',
             'age': 29,
+            'email': 'bugov@cpan.org'
             'skills': ['Python', 'Perl', 'C']
         })
 
@@ -37,7 +40,7 @@ Install
 Error messages
 --------------
 
-.. code:: bash
+.. code:: python
 
         from pythonish_validator.common import validate
 
@@ -61,7 +64,7 @@ Basic typing module support
 
 Supported types: List, Dict, Optional, Union.
 
-.. code:: bash
+.. code:: python
 
         from typing import Dict, List, Optional, Union
         from pythonish_validator.common import validate
@@ -90,7 +93,7 @@ Features
 
 🗣️ Speak the language of Python classes:
 
-.. code:: bash
+.. code:: python
 
         from pythonish_validator.common import Validator
 
@@ -129,7 +132,7 @@ Features
 
 🎓 And even custom validation:
 
-.. code:: bash
+.. code:: python
 
         import re
 
@@ -142,7 +145,7 @@ Features
                 if not isinstance(data, str):
                     return False
 
-                if re.match(r'\w+@\w+.\w{2,5}', data) is None:
+                if re.match(r'^\w+@\w+.\w{2,5}$', data) is None:
                     return False
 
                 return True
